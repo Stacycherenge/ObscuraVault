@@ -5,6 +5,7 @@ import { useVault } from "@/context/Vaultcontext";
 import { decryptSecret } from "@/utils/crypto";
 import { api } from "@/utils/api";
 import AddSecretModal from "@/components/AddSecretModal";
+import VaultTable, { DecryptedVaultItem } from "@/components/VaultTable";
 
 interface EncryptedVaultItem {
   id: number;
@@ -14,13 +15,6 @@ interface EncryptedVaultItem {
   iv: string;
 }
 
-interface DecryptedVaultItem {
-  id: number;
-  account_title: string;
-  username: string;
-  password: string;
-}
-
 export default function DashboardPage() {
   const { masterKey, userEmail, clearVaultSession } = useVault();
   const [items, setItems] = useState<DecryptedVaultItem[]>([]);
@@ -28,7 +22,6 @@ export default function DashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Define the isolated decryption function loop
   const fetchAndDecryptVault = async () => {
     if (!masterKey) return;
     setLoading(true);
@@ -82,11 +75,9 @@ export default function DashboardPage() {
     }
   };
 
-  if (!masterKey) return null; 
-
+  if (!masterKey) return null;
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 selection:bg-white selection:text-zinc-950">
-      {/* Navigation Layer */}
       <nav className="border-b border-zinc-900 bg-zinc-900/20 backdrop-blur-md px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -132,35 +123,7 @@ export default function DashboardPage() {
             <p className="text-sm text-zinc-500 font-medium">Vault environment is empty.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-zinc-900 bg-zinc-900/20">
-            <table className="w-full text-left border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-zinc-900 bg-zinc-950 text-zinc-400 text-xs font-semibold uppercase tracking-wider">
-                  <th className="px-6 py-4">Account Platform</th>
-                  <th className="px-6 py-4">Username ID</th>
-                  <th className="px-6 py-4">Decrypted Secret Key</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-900">
-                {items.map((item) => (
-                  <tr key={item.id} className="hover:bg-zinc-900/40 transition">
-                    <td className="px-6 py-4 font-semibold text-white">{item.account_title}</td>
-                    <td className="px-6 py-4 text-zinc-300 font-mono">{item.username}</td>
-                    <td className="px-6 py-4 text-zinc-300 font-mono">
-                      <input
-                        type="password"
-                        readOnly
-                        value={item.password}
-                        onClick={(e) => (e.currentTarget.type = e.currentTarget.type === "password" ? "text" : "password")}
-                        className="bg-transparent border-none outline-none cursor-pointer text-emerald-400 font-mono select-none"
-                        title="Click to toggle visibility option"
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <VaultTable items={items} />
         )}
       </main>
 

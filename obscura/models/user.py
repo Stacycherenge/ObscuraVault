@@ -1,9 +1,10 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, text, DateTime
+from datetime import datetime, timezone, timedelta
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-import func
+from sqlalchemy.sql import func
 import uuid
-from obscura.database import Base
+from database import Base
 
 class UserModel(Base):
     __tablename__ = "users"

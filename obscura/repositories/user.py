@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from obscura.user.models import UserModel
-from obscura.user.schemas import UserCreateSchema
+from models.user import UserModel
+from schemas.user import UserCreateSchema
 
 class UserRepository:
     def __init__(self, db: Session):

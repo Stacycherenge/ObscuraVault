@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { deriveKeys } from "@/utils/crypto";
-import { api } from "@/utils/api";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -18,7 +17,6 @@ export default function RegisterPage() {
     e.preventDefault();
     setError(null);
 
-    // 1. Structural Boundary Checks
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -34,11 +32,23 @@ export default function RegisterPage() {
     try {
       const { authPasswordHex } = await deriveKeys(password, email);
 
-      await api.post("/auth/signup", {
-        email: email,
-        auth_password: authPasswordHex,
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          auth_password: authPasswordHex,
+        }),
       });
 
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || "Registration request rejected by the security container.");
+      }
+
+      // Route smoothly into the sign-in portal on success
       router.push("/login");
     } catch (err: any) {
       console.error("Registration boundary execution failure:", err);
@@ -49,68 +59,68 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 text-zinc-50">
-      <div className="w-full max-w-md space-y-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-8 backdrop-blur-md shadow-2xl">
+    <div className="flex min-h-screen items-center justify-center bg-fortress-bg px-4 text-fortress-text transition-colors duration-200">
+      <div className="w-full max-w-md space-y-6 rounded-2xl border border-fortress-border bg-fortress-card p-8 shadow-2xl backdrop-blur-md">
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-white">Create Account</h1>
-          <p className="text-sm text-zinc-400">Initialize your secure Zero-Knowledge storage profile</p>
+          <h1 className="text-3xl font-bold tracking-tight text-fortress-text">Create Account</h1>
+          <p className="text-sm text-fortress-muted">Initialize your secure Zero-Knowledge storage profile</p>
         </div>
 
         {error && (
-          <div className="rounded-lg border border-red-900/50 bg-red-950/30 p-3 text-sm text-red-400">
+          <div className="rounded-lg border border-red-900/40 bg-red-950/20 p-3 text-sm text-red-400">
             {error}
           </div>
         )}
 
         <form onSubmit={handleRegister} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Email Address</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-fortress-muted">Email Address</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="alex@example.com"
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 outline-none transition focus:border-zinc-700"
+              className="w-full rounded-lg border border-fortress-border bg-fortress-bg px-4 py-2.5 text-fortress-text placeholder-fortress-muted/40 outline-none transition focus:border-fortress-accent"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Master Password</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-fortress-muted">Master Password</label>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••••"
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 outline-none transition focus:border-zinc-700"
+              className="w-full rounded-lg border border-fortress-border bg-fortress-bg px-4 py-2.5 text-fortress-text placeholder-fortress-muted/40 outline-none transition focus:border-fortress-accent"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Confirm Password</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-fortress-muted">Confirm Password</label>
             <input
               type="password"
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••••••"
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 outline-none transition focus:border-zinc-700"
+              className="w-full rounded-lg border border-fortress-border bg-fortress-bg px-4 py-2.5 text-fortress-text placeholder-fortress-muted/40 outline-none transition focus:border-fortress-accent"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-white py-3 font-semibold text-zinc-950 outline-none transition hover:bg-zinc-200 disabled:opacity-50"
+            className="w-full rounded-lg bg-fortress-accent py-3 font-semibold text-white outline-none transition hover:opacity-90 disabled:opacity-50 cursor-pointer shadow-lg shadow-fortress-accent/20"
           >
             {loading ? "Computing Cryptographic Hashes..." : "Register Vault Securely"}
           </button>
         </form>
 
-        <div className="text-center text-sm text-zinc-500">
-          Already have an operational vault?{" "}
-          <Link href="/login" className="font-medium text-zinc-300 hover:text-white underline underline-offset-4">
+        <div className="text-center text-sm text-fortress-muted">
+          Already have an operational Vault Account?{" "}
+          <Link href="/login" className="font-medium text-fortress-text hover:text-fortress-accent underline underline-offset-4 transition-colors">
             Sign In
           </Link>
         </div>

@@ -2,23 +2,23 @@
 from datetime import datetime, timedelta, timezone
 from typing import Any, Union
 import logging
-
 from fastapi import APIRouter, Depends, HTTPException, Response, Request
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-from obscura.database import get_db, Base, engine
-from obscura.user.schemas import UserCreateSchema, UserResponseSchema
-from obscura.user.repositories import UserRepository
+from database import get_db, Base, engine
+from schemas.user import UserCreateSchema, UserResponseSchema
+from repositories.user import UserRepository
 
 logger = logging.getLogger("security")
 
+
 class SecuritySettings(BaseSettings):
-    secret_key: str
-    algorithm: str = "HS256"
-    access_token_expire_minutes: int = 60 * 24 * 7
+    private_key: str
+    public_key: str
+    algorithm: str = "RS256"
+    access_token_expire_minutes: int = 60 * 2
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -27,9 +27,13 @@ class SecuritySettings(BaseSettings):
     )
 
 security_settings = SecuritySettings()
-SECRET_KEY = security_settings.secret_key
 ALGORITHM = security_settings.algorithm
 ACCESS_TOKEN_EXPIRE_MINUTES = security_settings.access_token_expire_minutes
+
+RSA_PRIVATE_KEY = security_settings.private_key.replace("\\n", "\n")
+RSA_PUBLIC_KEY = security_settings.public_key.replace("\\n", "\n")
+
+
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 

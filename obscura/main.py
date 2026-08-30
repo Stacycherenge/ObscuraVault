@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from obscura.database import Base, engine
-from obscura.user.models import UserModel
-from obscura.vault.models import VaultItemModel
-from obscura.user.routers import auth_router_instance
-from obscura.vault.routers import vault_router_instance
+from database import Base, engine
+from models.user import UserModel
+from models.vault import VaultItemModel
+from routers.user import auth_router_instance
+from routers.vault import vault_router_instance
 
 class AppOrchestrator:
     def __init__(self):

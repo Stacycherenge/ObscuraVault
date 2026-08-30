@@ -3,10 +3,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
-from obscura.database import dBase
-from obscura.user.routers import user_router_instance  
-from obscura.vault.schemas import VaultItemCreateSchema, VaultItemResponseSchema
-from obscura.vault.models import VaultItemModel
+from database import Base
+from routers.user import auth_router_instance   
+from schemas.vault import VaultItemCreateSchema, VaultItemResponseSchema
+from models.vault import VaultItemModel
+from database import get_db
+
+
 
 class VaultRepository:
     def __init__(self, db: Session):
@@ -38,7 +41,7 @@ class VaultRouter:
         @self.router.get("/", response_model=List[VaultItemResponseSchema])
         def get_vault_items(
             current_user_id: int = Depends(auth_router_instance.get_dependencies), 
-            db: Session = Depends(db_manager.get_db)
+            db: Session = Depends(get_db)
         ):
             repo = VaultRepository(db)
             return repo.get_user_items(current_user_id)
@@ -47,7 +50,7 @@ class VaultRouter:
         def add_vault_item(
             item_data: VaultItemCreateSchema,
             current_user_id: int = Depends(auth_router_instance.get_dependencies),
-            db: Session = Depends(db_manager.get_db)
+            db: Session = Depends(get_db)
         ):
             repo = VaultRepository(db)
             return repo.create_item(current_user_id, item_data)

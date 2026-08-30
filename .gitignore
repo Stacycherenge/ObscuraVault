@@ -1,0 +1,89 @@
+# ==========================================
+# 🔐 Environment Variables & Secrets (CRITICAL)
+# ==========================================
+.env
+env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# ==========================================
+# 📦 Dependency Managers (Massive folders)
+# ==========================================
+node_modules/
+.pnp
+.pnp.js
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+
+# ==========================================
+# 🚀 Next.js Build Outputs & Cache
+# ==========================================
+.next/
+out/
+.vercel
+.eslintcache
+
+# ==========================================
+# 💻 Operating System Artifacts
+# ==========================================
+.DS_Store
+Thumbs.db
+*.log
+
+# ==========================================
+# 🛠 IDE Settings (VS Code, PyCharm, DBeaver)
+# ==========================================
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Cache files
+__pycache__/
+
+
+# Virtual environments
+.env/
+.venv/
+env/
+
+
+# Environment variables /
+.env
+.env.local
+.env.*.local
+env/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE / editor
+.vscode/
+
+# Database
+*.db
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# FastAPI / uvicorn
+*.pid
+/env
+.env
+
+

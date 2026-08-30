@@ -15,6 +15,7 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
+@variant dark (&:where(.dark, .dark *));
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -25,8 +26,38 @@
 
 
 
-body {
-  background-color: #09090b; 
-  color: #fafafa;           
-  font-family: ui-sans-serif, system-ui, sans-serif;
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-purple-fortress: #09020f; /* Deepest obsidian violet base */
+  --color-purple-card: #140724;     /* Elevated velvet purple card panel layer */
+  --color-purple-border: #281242;   /* Distinct neon-dark stroke separator */
+  --color-purple-accent: #8b5cf6;   /* Electric purple highlight trigger button */
+  --color-purple-text: #c0aed6;     /* High-legibility lavender text color override */
+
+  
+  --color-zinc-50: #f5f2fa;
+  --color-zinc-100: #eadef7;
+  --color-zinc-200: #d5beee;
+  --color-zinc-300: #c0aed6;  
+  --color-zinc-400: #9a7eb8;
+  --color-zinc-500: #785a9c;
+  --color-zinc-600: #593f75;
+  --color-zinc-700: #3f2a54;
+  --color-zinc-800: #281242;   
+  --color-zinc-900: #140724;   
+  --color-zinc-950: #09020f;  
 }
+
+body {
+  background-color: var(--color-purple-fortress);
+  color: var(--color-zinc-50);
+  transition: background-color 0.2s ease, color 0.2s ease;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+
+}
+
+
+

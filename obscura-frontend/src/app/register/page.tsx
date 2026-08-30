@@ -48,7 +48,6 @@ export default function RegisterPage() {
         throw new Error(errData.detail || "Registration request rejected by the security container.");
       }
 
-      // Route smoothly into the sign-in portal on success
       router.push("/login");
     } catch (err: any) {
       console.error("Registration boundary execution failure:", err);

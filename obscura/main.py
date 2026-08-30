@@ -16,7 +16,7 @@ class AppOrchestrator:
         
     def configure_cors(self):
         origins = [
-            "http://localhost:3000",  
+            "https://obscura-vault-cc0og322u-stacy-cherenge.vercel.app/"  
         ]
         
         self.app.add_middleware(

@@ -30,7 +30,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const { authPasswordHex } = await deriveKeys(password, email);
+      const { masterPasswordHex } = await deriveKeys(password, email);
 
       const response = await fetch("/api/auth/signup", {
         method: "POST",
@@ -39,7 +39,7 @@ export default function RegisterPage() {
         },
         body: JSON.stringify({
           email: email,
-          auth_password: authPasswordHex,
+          master_password: masterPasswordHex,
         }),
       });
 

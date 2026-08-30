@@ -21,7 +21,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const { masterKey, authPasswordHex } = await deriveKeys(password, email);
+      const { masterKey, masterPasswordHex } = await deriveKeys(password, email);
 
       const response = await fetch("/api/auth/login", {
         method: "POST",
@@ -30,7 +30,7 @@ export default function LoginPage() {
         },
         body: JSON.stringify({
           email: email,
-          auth_password: authPasswordHex,
+          auth_password: masterPasswordHex,
         }),
         credentials: "include", 
       });

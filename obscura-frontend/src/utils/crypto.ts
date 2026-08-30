@@ -62,9 +62,9 @@ export async function deriveKeys(password: string, email: string) {
     ["encrypt", "decrypt"]
   );
 
-  const authPasswordHex = bufToHex(authPasswordBits);
+  const masterPasswordHex = bufToHex(authPasswordBits);
 
-  return { masterKey, authPasswordHex };
+  return { masterKey, masterPasswordHex };
 }
 
 

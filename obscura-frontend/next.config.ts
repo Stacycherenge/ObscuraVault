@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+import type { NextConfig } from "next";
 const nextConfig = {
   async rewrites() {
     return [
@@ -8,6 +9,12 @@ const nextConfig = {
       },
     ];
   },
+  images: {
+    unoptimized: true, // You can leave this true or remove it depending on your media needs
+  }
 };
 
 export default nextConfig;
+
+
+

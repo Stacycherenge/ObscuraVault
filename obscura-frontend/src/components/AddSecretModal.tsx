@@ -1,9 +1,8 @@
-    "use client";
+"use client";
 
 import React, { useState } from "react";
 import { useVault } from "@/context/Vaultcontext";
 import { encryptSecret } from "@/utils/crypto";
-import { api } from "@/utils/api";
 
 interface AddSecretModalProps {
   onClose: () => void;
@@ -28,73 +27,84 @@ export default function AddSecretModal({ onClose, onRefresh }: AddSecretModalPro
       const encryptedUser = await encryptSecret(username, masterKey);
       const encryptedPass = await encryptSecret(password, masterKey);
 
-      await api.post("/vault/", {
-        account_title: title,
-        encrypted_username: encryptedUser.ciphertext,
-        encrypted_password: encryptedPass.ciphertext,
-        iv: encryptedUser.iv, 
+      const response = await fetch("/api/vault/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          account_title: title,
+          encrypted_username: encryptedUser.ciphertext,
+          encrypted_password: encryptedPass.ciphertext,
+          iv: encryptedUser.iv,
+        }),
+        credentials: "include",
       });
 
-      onRefresh(); 
-      onClose(); 
+      if (!response.ok) {
+        throw new Error("Server rejected secure credentials persistence request.");
+      }
+
+      onRefresh();
+      onClose();
     } catch (err: any) {
       console.error("Cryptographic processing failure:", err);
-      setError("Failed to encrypt data fields block locally before delivery.");
+      setError(err.message || "Failed to encrypt data fields locally before storage.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 backdrop-blur-sm animate-fadeIn">
-      <div className="w-full max-w-md space-y-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-          <h3 className="text-lg font-bold text-white">Add New Secret Block</h3>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white transition font-mono text-sm outline-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-md space-y-6 rounded-2xl border border-fortress-border bg-fortress-card p-6 shadow-2xl animate-fadeIn">
+        <div className="flex items-center justify-between border-b border-fortress-border pb-3">
+          <h3 className="text-lg font-bold text-fortress-text">Add New Secret</h3>
+          <button onClick={onClose} className="text-fortress-muted hover:text-fortress-text transition-colors font-mono text-xs cursor-pointer">
             [ESC]
           </button>
         </div>
 
         {error && (
-          <div className="rounded-lg border border-red-900/50 bg-red-950/30 p-3 text-sm text-red-400">
+          <div className="rounded-lg border border-red-900/40 bg-red-950/20 p-3 text-sm text-red-400">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Platform Title</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-fortress-muted">Platform Title</label>
             <input
               type="text"
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Google, GitHub, AWS Profile"
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-2 text-zinc-100 placeholder-zinc-700 outline-none transition focus:border-zinc-700"
+              className="w-full rounded-lg border border-fortress-border bg-fortress-bg px-4 py-2 text-fortress-text placeholder-fortress-muted/40 outline-none transition focus:border-fortress-accent"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Account Identity / Email</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-fortress-muted">Account Username</label>
             <input
               type="text"
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="alex_dev"
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-2 text-zinc-100 placeholder-zinc-700 outline-none transition focus:border-zinc-700"
+              className="w-full rounded-lg border border-fortress-border bg-fortress-bg px-4 py-2 text-fortress-text placeholder-fortress-muted/40 outline-none transition focus:border-fortress-accent"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Target Plaintext Password</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-fortress-muted">Target Password</label>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••••"
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-2 text-zinc-100 placeholder-zinc-700 outline-none transition focus:border-zinc-700"
+              className="w-full rounded-lg border border-fortress-border bg-fortress-bg px-4 py-2 text-fortress-text placeholder-fortress-muted/40 outline-none transition focus:border-fortress-accent"
             />
           </div>
 
@@ -102,14 +112,14 @@ export default function AddSecretModal({ onClose, onRefresh }: AddSecretModalPro
             <button
               type="button"
               onClick={onClose}
-              className="w-1/3 rounded-lg border border-zinc-800 py-2.5 text-sm font-semibold text-zinc-400 hover:bg-zinc-800 hover:text-white transition"
+              className="w-1/3 rounded-lg border border-fortress-border py-2.5 text-sm font-semibold text-fortress-muted hover:bg-fortress-bg transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="w-2/3 rounded-lg bg-white py-2.5 text-sm font-semibold text-zinc-950 hover:bg-zinc-200 transition disabled:opacity-50"
+              className="w-2/3 rounded-lg bg-fortress-accent py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer shadow-lg shadow-fortress-accent/20"
             >
               {loading ? "AES Encryption Loop..." : "Encrypt & Save"}
             </button>

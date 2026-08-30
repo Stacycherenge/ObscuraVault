@@ -30,7 +30,7 @@ export default function DashboardPage() {
     try {
       const response = await fetch("/api/vault/", {
         method: "GET",
-        credentials: "include", // Essential for reading secure session cookies
+        credentials: "include",
       });
 
       if (!response.ok) {

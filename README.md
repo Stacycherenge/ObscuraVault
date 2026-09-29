@@ -6,25 +6,22 @@ The core architectural directive of Obscura Vault is absolute client-side data i
 ## Cryptographic & System Architecture
 Obscura Vault splits network operations, data structure validation, and raw cryptography into strict runtime boundaries:
 
+graph TD
+    A[Next.js Browser Workspace RAM] -->|Form Input: Master Password + Email Salt| B[PBKDF2: 100,000 Iterations]
+    
+    B --> C[256-bit Master Key Km<br><small>Trapped in Non-Exportable RAM</small>]
+    B --> D[256-bit Auth Password Pa<br><small>Hex Token Sent to Next.js Proxy</small>]
+    
+    C --> E[Local AES-GCM Encrypt/Decrypt]
+    E --> F[Ciphertext Blobs + 12-byte IV]
+    F --> G[Blind Storage Database Commit]
+    
+    D --> H[Secret Backend API Route]
+    H --> I[Server Hashing: Argon2id]
+    I --> J[Session Auth Cookie: RS256]
 
-[ Next.js Browser Workspace (RAM) ] ──> Form Input: Master Password + Email Salt
-                                                    │
-                                                    ▼
-                                      [ PBKDF2: 100,000 Iterations ]
-                                                    │
-                   ┌────────────────────────────────┴────────────────────────────────┐
-                   ▼                                                                 ▼
-      [ 256-bit Master Key (Km) ]                                     [ 256-bit Auth Password (Pa) ]
-    (Trapped in Non-Exportable RAM)                                   (Hex Token Sent to Next.js Proxy)
-                   │                                                                 │
-                   ▼                                                                 ▼
-    [ Local AES-GCM Encrypt/Decrypt ]                                   [ Secret Backend API Route ]
-                   │                                                                 │
-                   ▼                                                                 ▼
-    (Ciphertext Blobs + 12-byte IV)                                     [ Server Hashing: Argon2id ]
-                   │                                                                 │
-                   ▼                                                                 ▼
-    [ Blind Storage Database Commit ]                                 [ Session Auth Cookie: RS256 ]
+    style C fill:#2a2a2a,stroke:#444,stroke-width:1px
+    style D fill:#2a2a2a,stroke:#444,stroke-width:1px
 
 
 

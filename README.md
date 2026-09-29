@@ -3,43 +3,6 @@ Obscura Vault is a  **Secure-by-Design**, and **Zero-Knowledge** personal passwo
 
 The core architectural directive of Obscura Vault is absolute client-side data isolation. The remote application backend and database function purely as a blind storage locker—the host infrastructure holds zero knowledge of the user's master credentials or raw unencrypted secrets. If the remote database cluster were completely compromised, an attacker would harvest only cryptographically signed, randomized ciphertext blocks and unreadable execution hashes.
 
-## Cryptographic & System Architecture
-Obscura Vault splits network operations, data structure validation, and raw cryptography into strict runtime boundaries:
-       [ NEXT.JS BROWSER WORKSPACE (RAM) ]
-                        │
-    (Form Input: Master Password + Email Salt)
-                        │
-                        ▼
-          [ PBKDF2: 100,000 ITERATIONS ]
-                        │
-       ┌────────────────┴────────────────┐
-       ▼                                 ▼
-[ CLIENT-SIDE PATH ]              [ NETWORK & SERVER PATH ]
-       │                                 │
-┌──────▼─────────────────┐       ┌──────▼─────────────────┐
-│ 256-BIT MASTER KEY     │       │ 256-BIT AUTH PASSWORD  │
-│ (Km)                   │       │ (Pa)                   │
-│ - Trapped in non-      │       │ - Hex token sent to    │
-│   exportable RAM       │       │   Next.js Proxy        │
-└──────┬─────────────────┘       └──────┬─────────────────┘
-       │                                 │
-       │ (Local Crypto Engine)           │ (Network Payload)
-       │                                 │
-┌──────▼─────────────────┐       ┌──────▼─────────────────┐
-│ LOCAL AES-GCM ENGINE   │       │ SECRET BACKEND ROUTE   │
-│ - Handles in-browser   │       │ - Serverless endpoint  │
-│   data encryption      │       │   acting as proxy      │
-└──────┬─────────────────┘       └──────┬─────────────────┘
-       │                                 │
-       │ (Ciphertext + 12B IV)           │ (Inbound Transit)
-       │                                 │
-┌──────▼─────────────────┐       ┌──────▼─────────────────┐
-│ BLIND STORAGE DB       │       │ ARGON2ID HASHING       │
-│ - Commits encrypted    │       │ - High-security checks │
-│   payloads blindly     │       │ - Issues RS256 cookie  │
-└────────────────────────┘       └────────────────────────┘
-
-
 ### 1. Client-Side Cryptographic Schemes (The Web Crypto API)
 All encryption and decryption operations execute inside the user's browser via the native **Web Crypto API** (`window.crypto.subtle`), completely decoupled from the internet layer:
 *   **Key Derivation**: When logging in, the raw master password string and the user's email address (acting as a unique cryptographic salt) are processed through **PBKDF2 running 100,000 hashing loops** using a SHA-256 wrapper. This process blocks rainbow table and dictionary brute-force attacks.

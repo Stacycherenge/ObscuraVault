@@ -6,22 +6,36 @@ The core architectural directive of Obscura Vault is absolute client-side data i
 ## Cryptographic & System Architecture
 Obscura Vault splits network operations, data structure validation, and raw cryptography into strict runtime boundaries:
 
-graph TD
-    A[Next.js Browser Workspace RAM] -->|Form Input: Master Password + Email Salt| B[PBKDF2: 100,000 Iterations]
-    
-    B --> C[256-bit Master Key Km<br><small>Trapped in Non-Exportable RAM</small>]
-    B --> D[256-bit Auth Password Pa<br><small>Hex Token Sent to Next.js Proxy</small>]
-    
-    C --> E[Local AES-GCM Encrypt/Decrypt]
-    E --> F[Ciphertext Blobs + 12-byte IV]
-    F --> G[Blind Storage Database Commit]
-    
-    D --> H[Secret Backend API Route]
-    H --> I[Server Hashing: Argon2id]
-    I --> J[Session Auth Cookie: RS256]
-
-    style C fill:#2a2a2a,stroke:#444,stroke-width:1px
-    style D fill:#2a2a2a,stroke:#444,stroke-width:1px
+               [ NEXT.JS BROWSER WORKSPACE (RAM) ]
+                               │
+            (Form Input: Master Password + Email Salt)
+                               │
+                               ▼
+                 [ PBKDF2: 100,000 ITERATIONS ]
+                               │
+       ┌───────────────────────┴───────────────────────┐
+       │                                               │
+┌──────▼────────────────────────┐       ┌──────────────▼────────────────┐
+│ 256-BIT MASTER KEY (Km)       │       │ 256-BIT AUTH PASSWORD (Pa)    │
+│ - Trapped in non-exportable   │       │ - Hex token sent to Next.js   │
+│   browser memory (RAM)        │       │   Proxy route middleware      │
+└──────┬────────────────────────┘       └──────────────┬────────────────┘
+       │                                               │
+       │ (Local Crypto Engine)                         │ (Network Payload)
+       │                                               │
+┌──────▼────────────────────────┐       ┌──────────────▼────────────────┐
+│ LOCAL AES-GCM ENGINE          │       │ SECRET BACKEND API ROUTE      │
+│ - Handles in-browser data     │       │ - Edge / Serverless endpoint  │
+│   encryption and decryption   │       │   acting as application proxy │
+└──────┬────────────────────────┘       └──────────────┬────────────────┘
+       │                                               │
+       │ (Ciphertext Blobs + 12B IV)                   │ (Inbound Server Transit)
+       │                                               │
+┌──────▼────────────────────────┐       ┌──────────────▼────────────────┐
+│ BLIND STORAGE DATABASE        │       │ ARGON2ID SERVER HASHING       │
+│ - Commits encrypted payloads  │       │ - High-security hash checks   │
+│   without server knowledge    │       │ - Issues RS256 session cookie │
+└───────────────────────────────┘       └───────────────────────────────┘
 
 
 

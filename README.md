@@ -2,28 +2,30 @@
 Obscura Vault is a  **Secure-by-Design**, and **Zero-Knowledge** personal password and secret management platform. 
 
 The core architectural directive of Obscura Vault is absolute client-side data isolation. The remote application backend and database function purely as a blind storage locker—the host infrastructure holds zero knowledge of the user's master credentials or raw unencrypted secrets. If the remote database cluster were completely compromised, an attacker would harvest only cryptographically signed, randomized ciphertext blocks and unreadable execution hashes.
----## 🛠 Cryptographic & System Architecture
+
+## Cryptographic & System Architecture
 Obscura Vault splits network operations, data structure validation, and raw cryptography into strict runtime boundaries:
 
 
 [ Next.js Browser Workspace (RAM) ] ──> Form Input: Master Password + Email Salt
-│
-▼
-[ PBKDF2: 100,000 Iterations ]
-│
-┌────────────────────────┴────────────────────────┐
-▼ ▼
-[ 256-bit Master Key (Km) ] [ 256-bit Auth Password (Pa) ]
-(Trapped in Non-Exportable RAM) (Hex Token Sent to Next.js Proxy)
-│ │
-▼ ▼
-[ Local AES-GCM Encrypt/Decrypt ] [ Secret Backend API Route ]
-│ │
-▼ ▼
-(Ciphertext Blobs + 12-byte IV) [ Server Hashing: Argon2id ]
-│ │
-▼ ▼
-[ Blind Storage Database Commit ] [ Session Auth Cookie: RS256 ]
+                                                    │
+                                                    ▼
+                                      [ PBKDF2: 100,000 Iterations ]
+                                                    │
+                   ┌────────────────────────────────┴────────────────────────────────┐
+                   ▼                                                                 ▼
+      [ 256-bit Master Key (Km) ]                                     [ 256-bit Auth Password (Pa) ]
+    (Trapped in Non-Exportable RAM)                                   (Hex Token Sent to Next.js Proxy)
+                   │                                                                 │
+                   ▼                                                                 ▼
+    [ Local AES-GCM Encrypt/Decrypt ]                                   [ Secret Backend API Route ]
+                   │                                                                 │
+                   ▼                                                                 ▼
+    (Ciphertext Blobs + 12-byte IV)                                     [ Server Hashing: Argon2id ]
+                   │                                                                 │
+                   ▼                                                                 ▼
+    [ Blind Storage Database Commit ]                                 [ Session Auth Cookie: RS256 ]
+
 
 
 ### 1. Client-Side Cryptographic Schemes (The Web Crypto API)
@@ -40,9 +42,8 @@ The Python application microservice enforces strict data mapping, session guardi
 *   **Server-Side Hashing (Argon2id)**: The server takes the client's incoming `auth_password` token and hashes it a second time using **Argon2id** before evaluating database authentication checks. This protects the identity index against hardware-accelerated GPU cracking arrays.
 *   **Network Boundary Control**: Authentication JWT payloads are delivered solely inside isolated **HTTP-Only, Secure, SameSite=Strict cookies**. Browser JavaScript interfaces are completely blind to these session flags, neutralizing Cross-Site Scripting (XSS) token theft and Cross-Site Request Forgery (CSRF).
 
----
 
-## 📂 Project Repository Layout
+##  Project Repository Layout
 
 Obscura Vault is structured as a **Monorepo Architecture**, separating frontend UI components from backend transactional routines into dedicated subdirectories to preserve clean development perimeters:
 
@@ -95,24 +96,8 @@ obscura-project/
     └── next.config.js               # Next.js Server reverse proxy rewrites router
 ```
 
----
 
-## 🎨 Theme & Visual Engineering
-
-The Obscura User Interface features a premium, responsive **Midnight Purple and Obsidian Black** aesthetic optimized for high-fidelity dark styling. 
-
-### Tailwind CSS v4 Dynamic Tokens
-Because Obscura relies on the **Tailwind v4 pipeline**, style configurations are handled inside `src/app/globals.css` using custom `@theme` variables. This eliminates heavy, fragmented runtime utility classes and prevents page layout flashes when flipping modes. 
-
-Components rely on the custom semantic `--color-fortress-*` variable spectrum, which changes its underlying hex properties instantly when the `.dark` class is attached to or stripped from the root HTML element:
-
-*   `fortress-bg`: Shifts from a light-lavender canvas background to a deep obsidian black vault space.
-*   `fortress-card`: Transitions sharp container boundaries from absolute white to rich midnight purple blocks.
-*   `fortress-text` / `fortress-muted`: Adapts font legibility profiles instantly to optimize reading contrast ratios across any display interface.
-
----
-
-## 🚀 Execution & Environment Orchestration
+## Execution & Environment Orchestration
 
 ### Prerequisites
 *   Python 3.10+
@@ -178,9 +163,8 @@ npm run dev
 ```
 Open your browser to `http://localhost:3000` to interact with your secure architecture environment.
 
----
 
-## 🌐 Production Cloud Deployment Strategy
+## Production Cloud Deployment Strategy
 
 To deploy this monorepo project architecture into production for free, map your single unified GitHub repository across two dedicated platforms:
 

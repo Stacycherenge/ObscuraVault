@@ -5,38 +5,39 @@ The core architectural directive of Obscura Vault is absolute client-side data i
 
 ## Cryptographic & System Architecture
 Obscura Vault splits network operations, data structure validation, and raw cryptography into strict runtime boundaries:
-
-               [ NEXT.JS BROWSER WORKSPACE (RAM) ]
-                               │
-            (Form Input: Master Password + Email Salt)
-                               │
-                               ▼
-                 [ PBKDF2: 100,000 ITERATIONS ]
-                               │
-       ┌───────────────────────┴───────────────────────┐
-       │                                               │
-┌──────▼────────────────────────┐       ┌──────────────▼────────────────┐
-│ 256-BIT MASTER KEY (Km)       │       │ 256-BIT AUTH PASSWORD (Pa)    │
-│ - Trapped in non-exportable   │       │ - Hex token sent to Next.js   │
-│   browser memory (RAM)        │       │   Proxy route middleware      │
-└──────┬────────────────────────┘       └──────────────┬────────────────┘
-       │                                               │
-       │ (Local Crypto Engine)                         │ (Network Payload)
-       │                                               │
-┌──────▼────────────────────────┐       ┌──────────────▼────────────────┐
-│ LOCAL AES-GCM ENGINE          │       │ SECRET BACKEND API ROUTE      │
-│ - Handles in-browser data     │       │ - Edge / Serverless endpoint  │
-│   encryption and decryption   │       │   acting as application proxy │
-└──────┬────────────────────────┘       └──────────────┬────────────────┘
-       │                                               │
-       │ (Ciphertext Blobs + 12B IV)                   │ (Inbound Server Transit)
-       │                                               │
-┌──────▼────────────────────────┐       ┌──────────────▼────────────────┐
-│ BLIND STORAGE DATABASE        │       │ ARGON2ID SERVER HASHING       │
-│ - Commits encrypted payloads  │       │ - High-security hash checks   │
-│   without server knowledge    │       │ - Issues RS256 session cookie │
-└───────────────────────────────┘       └───────────────────────────────┘
-
+       [ NEXT.JS BROWSER WORKSPACE (RAM) ]
+                        │
+    (Form Input: Master Password + Email Salt)
+                        │
+                        ▼
+          [ PBKDF2: 100,000 ITERATIONS ]
+                        │
+       ┌────────────────┴────────────────┐
+       ▼                                 ▼
+[ CLIENT-SIDE PATH ]              [ NETWORK & SERVER PATH ]
+       │                                 │
+┌──────▼─────────────────┐       ┌──────▼─────────────────┐
+│ 256-BIT MASTER KEY     │       │ 256-BIT AUTH PASSWORD  │
+│ (Km)                   │       │ (Pa)                   │
+│ - Trapped in non-      │       │ - Hex token sent to    │
+│   exportable RAM       │       │   Next.js Proxy        │
+└──────┬─────────────────┘       └──────┬─────────────────┘
+       │                                 │
+       │ (Local Crypto Engine)           │ (Network Payload)
+       │                                 │
+┌──────▼─────────────────┐       ┌──────▼─────────────────┐
+│ LOCAL AES-GCM ENGINE   │       │ SECRET BACKEND ROUTE   │
+│ - Handles in-browser   │       │ - Serverless endpoint  │
+│   data encryption      │       │   acting as proxy      │
+└──────┬─────────────────┘       └──────┬─────────────────┘
+       │                                 │
+       │ (Ciphertext + 12B IV)           │ (Inbound Transit)
+       │                                 │
+┌──────▼─────────────────┐       ┌──────▼─────────────────┐
+│ BLIND STORAGE DB       │       │ ARGON2ID HASHING       │
+│ - Commits encrypted    │       │ - High-security checks │
+│   payloads blindly     │       │ - Issues RS256 cookie  │
+└────────────────────────┘       └────────────────────────┘
 
 
 ### 1. Client-Side Cryptographic Schemes (The Web Crypto API)
